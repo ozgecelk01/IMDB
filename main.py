@@ -1,23 +1,16 @@
-import cv2
-import matplotlib.pyplot as plt
+import pandas as pd
 
-photo_name=input("Enter photo name with .jpeg: ")
-photo = cv2.imread(photo_name)
+path = 'imdb_top_1000.csv'
+df = pd.read_csv(path)
 
-face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-eye_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
+df.drop(['Poster_Link','Certificate','Overview','Meta_score','No_of_Votes','Gross','Runtime'],axis = 1,inplace= True)
 
-faces = face_cascade.detectMultiScale(photo, scaleFactor=1.075, minNeighbors=5, minSize=(15,15))
+name=input("Actress or Actor or Director name: ")
 
-for(x,y,w,h) in faces:
-  cv2.rectangle(photo, (x,y),(x+w,y+h), (255,0,0),2 )
-  roi = photo[y:y+h, x:x+w]
-  gozler = eye_cascade.detectMultiScale(roi)
-  for(ex,ey,ew,eh) in gozler:
-    cv2.rectangle(roi, (ex,ey), (ex+ew, ey+eh), (0,255,0),1)
+found_entries = df[df[['Director', 'Star1', 'Star2', 'Star3', 'Star4']].apply(lambda row: row.str.contains(name, case=False)).any(axis=1)]['Series_Title']
 
-print("Number Of Faces = ",format(len(faces)))
-
-plt.figure(figsize=(8,12))
-plt.imshow(photo)
-plt.show()
+if not found_entries.empty:
+    found_entries.index = found_entries.index + 1
+    print(found_entries)
+else:
+    print("Not found.")
